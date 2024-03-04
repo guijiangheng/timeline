@@ -1,8 +1,10 @@
 'use client';
 
+import { useMemo } from 'react';
+
 import { PIXELS_PER_SECOND } from '@/utils/consts';
 import { useDroppable } from '@dnd-kit/core';
-import { useMemo } from 'react';
+
 import { useStore } from './app';
 import { Timeline } from './timeline';
 
@@ -31,7 +33,7 @@ export const Timelines = () => {
   return (
     <div
       ref={setNodeRef}
-      className="flex h-80 flex-col overflow-auto border-t border-gray-900 bg-gray-700"
+      className="flex flex-1 flex-col"
       style={{
         opacity: isOver ? 0.8 : 1,
         minWidth: `${width + 100}px`,

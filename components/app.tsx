@@ -4,13 +4,9 @@ import { nanoid } from 'nanoid';
 import { type ReactNode } from 'react';
 import { useImmer, type Updater } from 'use-immer';
 
+import { type AssetType } from '@/utils/consts';
 import { createContext } from '@/utils/create-context';
 import { DndContext } from '@dnd-kit/core';
-
-export enum AssetType {
-  Video,
-  Audio,
-}
 
 export interface AssetData {
   id: string;
@@ -20,6 +16,7 @@ export interface AssetData {
 }
 
 export interface ClipData {
+  id: string;
   position: number;
   begin: number;
   end: number;
@@ -39,16 +36,13 @@ interface StoreValue {
 
 export const [StoreProviderImpl, useStore] = createContext<StoreValue>('Store');
 
-export const StoreProvider = ({ children }: { children: ReactNode }) => {
-  const [assets] = useImmer<AssetData[]>(() =>
-    new Array(4).fill(null).map((_, k) => ({
-      id: nanoid(),
-      type: AssetType.Video,
-      duration: 5 + Math.floor(Math.random() * 100 * 100) / 100,
-      cover: `https://picsum.photos/id/${k}/200/300`,
-    })),
-  );
-
+export const StoreProvider = ({
+  assets,
+  children,
+}: {
+  assets: AssetData[];
+  children: ReactNode;
+}) => {
   const [timelines, setTimelines] = useImmer<TimelineData[]>(() =>
     new Array(4).fill(null).map((_, k) => ({
       id: nanoid(),
@@ -75,6 +69,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
               id: nanoid(),
               clips: [
                 {
+                  id: nanoid(),
                   position: 0,
                   begin: 0,
                   end: asset.duration,

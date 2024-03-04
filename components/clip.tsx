@@ -3,11 +3,56 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { PIXELS_PER_SECOND } from '@/utils/consts';
-import { type ClipData } from './app';
+import { useEventCallback } from '@/utils/use-event-callback';
 
-export const Clip = ({ begin, end, asset }: ClipData) => {
-  const left = useDrag();
-  const right = useDrag();
+import { useStore, type ClipData } from './app';
+
+export interface ClipProps extends ClipData {
+  timelineId: string;
+}
+
+export const Clip = ({
+  timelineId,
+  id,
+  position,
+  begin,
+  end,
+  asset,
+}: ClipProps) => {
+  const { setTimelines } = useStore();
+
+  const left = useDrag((offset) => {
+    setTimelines((timelines) => {
+      const timeline = timelines.find((x) => x.id === timelineId);
+      if (timeline !== undefined) {
+        const clip = timeline.clips.find((x) => x.id === id);
+        if (clip !== undefined) {
+          const newBegin = Math.min(
+            clip.end,
+            Math.max(0, clip.begin + offset / PIXELS_PER_SECOND),
+          );
+          const realOffset = newBegin - clip.begin;
+          clip.begin = newBegin;
+          clip.position += realOffset;
+        }
+      }
+    });
+  });
+
+  const right = useDrag((offset) => {
+    setTimelines((timelines) => {
+      const timeline = timelines.find((x) => x.id === timelineId);
+      if (timeline !== undefined) {
+        const clip = timeline.clips.find((x) => x.id === id);
+        if (clip !== undefined) {
+          clip.end = Math.max(
+            clip.begin,
+            Math.min(asset.duration, clip.end + offset / PIXELS_PER_SECOND),
+          );
+        }
+      }
+    });
+  });
 
   return (
     <div
@@ -16,31 +61,32 @@ export const Clip = ({ begin, end, asset }: ClipData) => {
         width: `${(end - begin) * PIXELS_PER_SECOND}px`,
         backgroundImage: `url(${asset.cover})`,
         backgroundSize: '60px auto',
+        transform: `translateX(${position * PIXELS_PER_SECOND}px)`,
       }}
     >
       <div
         ref={left.ref}
-        className="absolute left-0 h-full w-2 cursor-ew-resize bg-red-600"
+        className="absolute left-0 top-0 h-full w-2 cursor-ew-resize bg-red-600"
         style={{
-          transform: `translateX(${left.offsetX}px)`,
+          transform: `translateX(${begin * PIXELS_PER_SECOND}px)`,
         }}
       />
       <div
         ref={right.ref}
-        className="absolute right-0 h-full w-2 cursor-ew-resize bg-red-600"
-        style={{
-          transform: `translateX(${right.offsetX}px)`,
-        }}
+        className="absolute right-0 top-0 h-full w-2 cursor-ew-resize bg-red-600"
       />
     </div>
   );
 };
 
-const useDrag = () => {
+type UseDragCallback = (offset: number) => void;
+
+const useDrag = (callback: UseDragCallback) => {
   const ref = useRef<HTMLDivElement>(null);
 
   const [dragging, setDragging] = useState(false);
-  const [offsetX, setOffsetX] = useState(0);
+
+  const memoCallback = useEventCallback(callback);
 
   useEffect(() => {
     if (ref.current !== null) {
@@ -55,12 +101,12 @@ const useDrag = () => {
       };
 
       const onMouseMove = (e: MouseEvent) => {
-        setOffsetX(e.pageX - startX);
+        memoCallback(e.pageX - startX);
+        startX = e.pageX;
       };
 
       const onMouseUp = (e: MouseEvent) => {
         setDragging(false);
-        setOffsetX(0);
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
       };
@@ -71,7 +117,7 @@ const useDrag = () => {
         node.removeEventListener('mousedown', onMouseDown);
       };
     }
-  }, []);
+  }, [memoCallback]);
 
-  return { ref, dragging, offsetX };
+  return { ref, dragging };
 };
