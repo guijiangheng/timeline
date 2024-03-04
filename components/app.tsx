@@ -61,23 +61,46 @@ export const StoreProvider = ({
   return (
     <DndContext
       onDragEnd={(e) => {
-        if (e.over !== null && e.over.id === 'timelines') {
-          setTimelines((draft) => {
-            const asset = assets.find((x) => x.id === e.active.id)!;
+        if (e.over !== null) {
+          if (e.over.id === 'timelines') {
+            setTimelines((draft) => {
+              const asset = assets.find((x) => x.id === e.active.id)!;
 
-            draft.push({
-              id: nanoid(),
-              clips: [
-                {
-                  id: nanoid(),
-                  position: 0,
-                  begin: 0,
-                  end: asset.duration,
-                  asset,
-                },
-              ],
+              draft.push({
+                id: nanoid(),
+                clips: [
+                  {
+                    id: nanoid(),
+                    position: 0,
+                    begin: 0,
+                    end: asset.duration,
+                    asset,
+                  },
+                ],
+              });
             });
-          });
+          } else if (typeof e.over.id === 'string') {
+            setTimelines((draft) => {
+              console.log(e.over!.id);
+              const asset = assets.find((x) => x.id === e.active.id)!;
+              const timeline = draft.find((x) => x.id === e.over!.id)!;
+
+              let position = 0;
+
+              if (timeline.clips.length > 0) {
+                const lastClip = timeline.clips[timeline.clips.length - 1];
+                position = lastClip.position + (lastClip.end - lastClip.begin);
+              }
+
+              timeline.clips.push({
+                id: nanoid(),
+                position,
+                begin: 0,
+                end: asset.duration,
+                asset,
+              });
+            });
+          }
         }
       }}
     >
