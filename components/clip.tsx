@@ -21,6 +21,21 @@ export const Clip = ({
 }: ClipProps) => {
   const { setTimelines } = useStore();
 
+  const middle = useDrag((offset) => {
+    setTimelines((timelines) => {
+      const timeline = timelines.find((x) => x.id === timelineId);
+      if (timeline !== undefined) {
+        const clip = timeline.clips.find((x) => x.id === id);
+        if (clip !== undefined) {
+          clip.position = Math.max(
+            0,
+            clip.position + offset / PIXELS_PER_SECOND,
+          );
+        }
+      }
+    });
+  });
+
   const left = useDrag((offset) => {
     setTimelines((timelines) => {
       const timeline = timelines.find((x) => x.id === timelineId);
@@ -56,7 +71,8 @@ export const Clip = ({
 
   return (
     <div
-      className="absolute h-8 overflow-hidden rounded-md border border-gray-500 bg-red-300"
+      ref={middle.ref}
+      className="absolute h-8 cursor-grab overflow-hidden rounded-md border border-gray-500 bg-red-300"
       style={{
         width: `${(end - begin) * PIXELS_PER_SECOND}px`,
         backgroundImage: `url(${asset.cover})`,
@@ -67,9 +83,6 @@ export const Clip = ({
       <div
         ref={left.ref}
         className="absolute left-0 top-0 h-full w-2 cursor-ew-resize bg-red-600"
-        style={{
-          transform: `translateX(${begin * PIXELS_PER_SECOND}px)`,
-        }}
       />
       <div
         ref={right.ref}
@@ -94,6 +107,8 @@ const useDrag = (callback: UseDragCallback) => {
       let startX = 0;
 
       const onMouseDown = (e: MouseEvent) => {
+        e.stopPropagation();
+
         setDragging(true);
         startX = e.pageX;
         document.addEventListener('mousemove', onMouseMove);
