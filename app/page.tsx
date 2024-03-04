@@ -7,11 +7,11 @@ export default function Home() {
     <StoreProvider>
       <main className="flex min-h-screen">
         {/* Asset library */}
-        <div className="flex w-80 border-r border-gray-300 p-2">
+        <div className="flex w-80 flex-shrink-0 border-r border-gray-300 p-2">
           <Assets />
         </div>
 
-        <div className="flex flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col">
           <div className="flex flex-1 items-center justify-center">Canvas</div>
           <Timelines />
         </div>

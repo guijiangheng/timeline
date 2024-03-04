@@ -2,11 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+import { PIXELS_PER_SECOND } from '@/utils/consts';
 import { type ClipData } from './app';
 
-export type ClipProps = ClipData;
-
-export const Clip = ({ begin, end, asset }: ClipProps) => {
+export const Clip = ({ begin, end, asset }: ClipData) => {
   const left = useDrag();
   const right = useDrag();
 
@@ -14,7 +13,9 @@ export const Clip = ({ begin, end, asset }: ClipProps) => {
     <div
       className="absolute h-8 overflow-hidden rounded-md border border-gray-500 bg-red-300"
       style={{
-        width: `${(end - begin) * 10}px`,
+        width: `${(end - begin) * PIXELS_PER_SECOND}px`,
+        backgroundImage: `url(${asset.cover})`,
+        backgroundSize: '60px auto',
       }}
     >
       <div
