@@ -1,14 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { type AssetData } from './asset';
 
-export interface ClipData {
-  position: number;
-  begin: number;
-  end: number;
-  asset: AssetData;
-}
+import { type ClipData } from './app';
 
 export type ClipProps = ClipData;
 

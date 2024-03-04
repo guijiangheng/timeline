@@ -9,10 +9,7 @@
   "editor.quickSuggestions": {
     "strings": "on"
   },
-  "cSpell.words": [
-    "sandpack",
-    "tailwindcss",
-  ],
+  "cSpell.words": ["Immer", "sandpack", "tailwindcss"],
   "files.associations": {
     "*.css": "tailwindcss"
   }
